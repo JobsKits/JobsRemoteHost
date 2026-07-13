@@ -59,4 +59,10 @@
 
 授权前 `frame` 和 `control` 接口都会返回拒绝，不会传输屏幕或执行输入事件。
 
+## 四、顶部菜单栏驻留 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+
+- macOS 点击黄色最小化按钮后，Tkinter 主窗口会隐藏并驻留系统顶部菜单栏，后台服务和公网通道继续运行。
+- 点击顶部菜单栏图标中的“显示 JobsRemoteHost”可恢复窗口。
+- 点击“停止服务并退出 JobsRemoteHost”才会停止后台服务、关闭通道并退出进程。
+
 <a id="🔚" href="#前言" style="font-size:17px; color:green; font-weight:bold;">我是有底线的➤点我回到首页</a>

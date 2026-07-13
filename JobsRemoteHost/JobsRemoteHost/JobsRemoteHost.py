@@ -59,6 +59,13 @@ SELF_TEST_JPEG = base64.b64decode(
 )
 
 
+def resource_path(name: str) -> Path:
+    """返回源码运行或 PyInstaller 打包后的资源路径。"""
+
+    bundle_root = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+    return bundle_root / name
+
+
 @dataclasses.dataclass(slots=True)
 class FrameInfo:
     """记录当前屏幕帧的尺寸信息。"""
@@ -1050,6 +1057,8 @@ class JobsRemoteHostApp:
         self.log_text: Any | None = None
         self.start_button: Any | None = None
         self.stop_button: Any | None = None
+        self.tray_icon: Any | None = None
+        self._quitting = False
 
     def run(self) -> None:
         """运行 GUI 主循环。"""
@@ -1061,6 +1070,9 @@ class JobsRemoteHostApp:
         self.root.title(APP_NAME)
         self.root.minsize(900, 760)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
+        self.root.bind("<Unmap>", self._on_window_unmap, add="+")
+        self._setup_window_icon()
+        self._setup_system_tray()
 
         self.status_var = tk.StringVar(value=f"服务未开启，邀请码：{self.config.invite_code}")
         self.permission_var = tk.StringVar(value=self._permission_status_text())
@@ -1123,6 +1135,76 @@ class JobsRemoteHostApp:
         self._poll_ui_queue()
         self.log.write("窗口已启动")
         self.root.mainloop()
+
+    def _setup_window_icon(self) -> None:
+        """为 Tk 窗口设置与菜单栏一致的图标。"""
+
+        if self.root is None:
+            return
+        try:
+            import tkinter as tk
+
+            self._window_icon = tk.PhotoImage(file=str(resource_path("icon.png")))
+            self.root.iconphoto(True, self._window_icon)
+        except Exception as exc:
+            self.log.write(f"窗口图标加载失败，继续使用系统默认图标：{exc}")
+
+    def _setup_system_tray(self) -> None:
+        """创建 macOS 顶部菜单栏 / Windows 通知区域图标。"""
+
+        try:
+            import pystray
+            from PIL import Image
+
+            image = Image.open(resource_path("icon.png")).convert("RGBA")
+            menu = pystray.Menu(
+                pystray.MenuItem("显示 JobsRemoteHost", self._tray_restore),
+                pystray.Menu.SEPARATOR,
+                pystray.MenuItem("停止服务并退出 JobsRemoteHost", self._tray_quit),
+            )
+            self.tray_icon = pystray.Icon(APP_NAME, image, APP_NAME, menu)
+            self.tray_icon.run_detached()
+        except Exception as exc:
+            self.tray_icon = None
+            self.log.write(f"顶部菜单栏图标不可用，继续使用普通窗口模式：{exc}")
+
+    def _on_window_unmap(self, _event: Any) -> None:
+        """黄色最小化按钮触发后，把窗口隐藏到顶部菜单栏。"""
+
+        if self.root is not None:
+            self.root.after_idle(self._hide_to_system_tray_if_minimized)
+
+    def _hide_to_system_tray_if_minimized(self) -> None:
+        if self.root is None or self.tray_icon is None or self._quitting:
+            return
+        if self.root.state() == "iconic":
+            self.root.withdraw()
+
+    def _tray_restore(self, _icon: Any = None, _item: Any = None) -> None:
+        if self.root is not None:
+            self.root.after(0, self._restore_from_system_tray)
+
+    def _restore_from_system_tray(self) -> None:
+        if self.root is None:
+            return
+        self.root.deiconify()
+        self.root.lift()
+        self.root.focus_force()
+
+    def _tray_quit(self, _icon: Any = None, _item: Any = None) -> None:
+        if self.root is not None:
+            self.root.after(0, self._quit_application)
+
+    def _quit_application(self) -> None:
+        if self._quitting:
+            return
+        self._quitting = True
+        self.stop_service()
+        if self.tray_icon is not None:
+            self.tray_icon.stop()
+            self.tray_icon = None
+        if self.root is not None:
+            self.root.destroy()
 
     def start_service(self) -> None:
         """响应开启服务按钮。"""
@@ -1327,9 +1409,7 @@ class JobsRemoteHostApp:
     def _on_close(self) -> None:
         """关闭窗口前停止后台服务。"""
 
-        self.stop_service()
-        if self.root is not None:
-            self.root.destroy()
+        self._quit_application()
 
 
 def run_self_test() -> int:
