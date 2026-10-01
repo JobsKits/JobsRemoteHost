@@ -54,6 +54,7 @@ show_script_intro_and_wait() {
     error_echo "当前没有可交互输入，请在终端或 Finder 中运行。"
     return 1
   fi
+  print '打包前清理旧 dist；成功后在第一层更新产物快捷方式、打开目录并启动本机软件。'
   read -r "?👉 已了解脚本用途与影响，按回车继续；按 Ctrl+C 取消：" _
 }
 # 检查内层构建入口是否存在。

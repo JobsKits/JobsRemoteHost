@@ -12,6 +12,7 @@ echo 影响范围：会调用内层 Python 工程，准备 .venv、依赖、clou
 echo 输出目录：%SCRIPT_DIR%
 echo ======================================================================
 echo.
+echo Build clears old dist. On success, reveal output and launch the packaged app.
 pause
 
 if not exist "%PROJECT_LAUNCHER%" (

@@ -33,8 +33,8 @@ JobsRemoteHost.py/
 
 | 平台 | 双击入口 | 输出产物 |
 | --- | --- | --- |
-| macOS | `./【MacOS】📦生成dmg.command` | `./JobsRemoteHost-macOS-架构.dmg` |
-| Windows | `./【Windows】📦生成exe.bat` | `./JobsRemoteHost-Windows.exe` |
+| macOS | `./【MacOS】📦生成dmg.command` | `../dist/YYYY.MM.DD HH-mm-ss/JobsRemoteHost-macOS-架构.dmg` |
+| Windows | `./【Windows】📦生成exe.bat` | `../dist/YYYY.MM.DD HH-mm-ss/JobsRemoteHost-Windows.exe` |
 
 打包脚本会在内层工程中创建 `.venv`，安装运行依赖和 [**PyInstaller**](https://pyinstaller.org/)，并下载 [**cloudflared**](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) 到 `./JobsRemoteHost/tools/`。这些内容只写在当前目录树内，不安装到系统目录。
 
@@ -69,5 +69,13 @@ JobsRemoteHost.py/
 | 打包脚本日志 | 系统临时目录里的 `【MacOS】📦生成dmg.log` 或终端窗口输出 |
 | 应用日志（macOS） | `~/Library/Logs/JobsRemoteHost/JobsRemoteHost.log` |
 | 应用日志（Windows） | `%LOCALAPPDATA%\JobsRemoteHost\logs\JobsRemoteHost.log` |
+
+打包前会清理该应用工程的旧 `dist` 产物，清理失败则停止；成功后自动打开当前平台产物的磁盘位置并运行本次生成的 APP / EXE，结尾无需回车。失败时不启动软件；运行前的防误触确认保留。
+
+必需依赖缺失时，直接回车联网安装；输入任意字符后回车取消整个流程。安装失败或复检仍不可用时停止，不继续清理旧产物或打包。健康依赖直接复用；可选升级和词库更新仍为回车跳过、任意字符执行。
+
+第一层交付目录与平台打包脚本同层保存 `dist/`，以及最新 APP / DMG 的相对符号链接（Mac）或 EXE / 分发包的 `.lnk`（Windows）。双击快捷方式即可接触成品，真实文件保留在 `dist/`；成功构建自动更新入口，清理旧产物时移除对应旧入口。尚无成品时不生成无效快捷方式。
+
+构建产物使用本机本地构建时间，格式为 `YYYY.MM.DD HH-mm-ss`（年月日时分秒），例如 `2020.06.04 12-23-21`。每次构建的 APP、DMG、EXE、ZIP 和配套文件统一保存到交付层 `../dist/YYYY.MM.DD HH-mm-ss/`，同次构建只取一次时间；第一层快捷方式指向本次时间目录，成功后打开该目录并启动其中的软件。旧产物沿用原有清理规则；历史产物缺少可靠构建时间时，不补写推测时间。
 
 <a id="🔚" href="#前言" style="font-size:17px; color:green; font-weight:bold;">我是有底线的➤点我回到首页</a>

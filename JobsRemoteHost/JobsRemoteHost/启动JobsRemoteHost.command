@@ -3,7 +3,7 @@
 # 脚本自述：
 # - 脚本名称：启动JobsRemoteHost.command
 # - 核心用途：准备 Python 构建环境，按参数生成 macOS dmg，或供开发时源码启动。
-# - 影响范围：只在当前 JobsRemoteHost Python 工程内创建 .venv、tools、build、dist，并输出 dmg 到外层目录。
+# - 影响范围：只在当前 JobsRemoteHost Python 工程内创建 .venv、tools、build、dist，并输出 dmg 到工程 dist。
 # - 运行提示：运行后会先打印内置自述；终端确认后继续，外层打包脚本可通过环境变量跳过重复确认。
 
 setopt NO_NOMATCH
@@ -13,12 +13,13 @@ SCRIPT_PATH="${SCRIPT_DIR}/$(basename -- "$0")"
 SCRIPT_BASENAME="$(basename "$0" | sed 's/\.[^.]*$//')"
 LOG_FILE="${TMPDIR:-/tmp}/${SCRIPT_BASENAME}.log"
 PROJECT_DIR="${SCRIPT_DIR}"
-OUTER_DIR="$(cd "${PROJECT_DIR}/.." && pwd)"
+OUTER_DIR="$(cd "${PROJECT_DIR}/../.." && pwd)"
 VENV_DIR="${PROJECT_DIR}/.venv"
 PYTHON_BIN="${VENV_DIR}/bin/python"
 PIP_BIN="${VENV_DIR}/bin/pip"
 MODE="${1:-build-dmg}"
-OUTPUT_DIR="${JOBS_REMOTE_HOST_OUTPUT_DIR:-${OUTER_DIR}}"
+DIST_ROOT="${OUTER_DIR}/dist"
+OUTPUT_DIR="$DIST_ROOT"
 : > "$LOG_FILE"
 
 # 记录终端和日志。
@@ -55,6 +56,8 @@ show_script_intro_and_wait() {
   highlight_echo "============================== 脚本自述 =============================="
   note_echo "当前脚本：${SCRIPT_PATH}"
   note_echo "核心用途：生成 JobsRemoteHost 的 macOS dmg；内层也保留开发用源码启动参数。"
+  note_echo "构建产物按本机年月日时分秒保存到 dist/YYYY.MM.DD HH-mm-ss/（例如 2020.06.04 12-23-21），同次构建共用一个时间目录。"
+  warn_echo "打包前清理工程旧 dist；成功后定位产物并启动本机 APP。"
   warn_echo "影响范围：会在 ${PROJECT_DIR} 内创建 .venv / tools / build / dist，并下载 cloudflared。"
   gray_echo "输出目录：${OUTPUT_DIR}"
   gray_echo "日志文件：${LOG_FILE}"
@@ -89,6 +92,12 @@ PY
     return 1
   }
 }
+# 必需依赖缺失时回车安装，任意字符取消整个流程。
+confirm_required_install() {
+  local answer=""
+  IFS= read -r "?${1}（直接回车安装；输入任意字符后回车取消）：" answer || { print -u2 '没有交互输入，停止依赖安装。'; exit 1; }
+  [[ -z "$answer" ]] || { print -u2 '已取消依赖安装，停止当前流程。'; exit 1; }
+}
 # 创建虚拟环境并安装运行 / 构建依赖。
 prepare_python_environment() {
   cd "$PROJECT_DIR" || return 1
@@ -96,9 +105,11 @@ prepare_python_environment() {
     note_echo "创建 Python 虚拟环境：${VENV_DIR}"
     python3 -m venv "$VENV_DIR" || return 1
   fi
-  note_echo "安装运行与打包依赖"
-  "$PIP_BIN" install --upgrade pip wheel setuptools | tee -a "$LOG_FILE" || return 1
-  "$PIP_BIN" install -r requirements-build.txt | tee -a "$LOG_FILE" || return 1
+  if ! "$PYTHON_BIN" -c 'import mss, PIL, pynput, PyInstaller' >/dev/null 2>&1; then
+    confirm_required_install "需要联网补齐工程依赖"
+    "$PIP_BIN" install -r requirements-build.txt | tee -a "$LOG_FILE" || return 1
+    "$PYTHON_BIN" -c 'import mss, PIL, pynput, PyInstaller' || return 1
+  fi
 }
 # 返回当前 Mac CPU 架构名称。
 get_cpu_arch() {
@@ -115,6 +126,7 @@ prepare_cloudflared() {
     success_echo "cloudflared 已存在：${tools_dir}/cloudflared"
     return 0
   fi
+  confirm_required_install "缺少 cloudflared，需要联网下载"
   arch="$(get_cpu_arch)"
   url="https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-darwin-${arch}.tgz"
   archive="${tools_dir}/cloudflared-darwin-${arch}.tgz"
@@ -128,10 +140,16 @@ prepare_cloudflared() {
 # 执行 PyInstaller 构建。
 build_app() {
   cd "$PROJECT_DIR" || return 1
+  [[ ! -L "${DIST_ROOT}" ]] || { error_echo "拒绝清理符号链接 dist"; return 1; }
+  "$PYTHON_BIN" "${PROJECT_DIR}/scripts/artifact_shortcuts.py" --root "$OUTER_DIR" --clear || return 1
+  rm -rf -- "$DIST_ROOT" || return 1
+  BUILD_STAMP="$(date "+%Y.%m.%d %H-%M-%S")"
+  OUTPUT_DIR="${DIST_ROOT}/${BUILD_STAMP}"
+  note_echo "构建时间（年月日时分秒）：${BUILD_STAMP}"
   note_echo "开始 PyInstaller 打包"
-  "$PYTHON_BIN" -m PyInstaller --noconfirm --clean JobsRemoteHost.spec | tee -a "$LOG_FILE" || return 1
-  [[ -d "${PROJECT_DIR}/dist/JobsRemoteHost.app" ]] || {
-    error_echo "未找到 dist/JobsRemoteHost.app"
+  "$PYTHON_BIN" -m PyInstaller --noconfirm --clean --distpath "$OUTPUT_DIR" JobsRemoteHost.spec | tee -a "$LOG_FILE" || return 1
+  [[ -d "${OUTPUT_DIR}/JobsRemoteHost.app" ]] || {
+    error_echo "未找到构建产物：${OUTPUT_DIR}/JobsRemoteHost.app"
     return 1
   }
 }
@@ -145,7 +163,7 @@ create_dmg() {
   dmg_path="${OUTPUT_DIR}/JobsRemoteHost-macOS-${arch}.dmg"
   rm -rf "$stage_dir"
   mkdir -p "$stage_dir"
-  cp -R "${PROJECT_DIR}/dist/JobsRemoteHost.app" "$stage_dir/"
+  cp -R "${OUTPUT_DIR}/JobsRemoteHost.app" "$stage_dir/"
   ln -s /Applications "${stage_dir}/Applications"
   rm -f "$dmg_path"
   note_echo "生成 dmg：${dmg_path}"
@@ -172,6 +190,9 @@ run_selected_mode() {
       run_self_test || return 1
       build_app || return 1
       create_dmg || return 1
+      "$PYTHON_BIN" "${PROJECT_DIR}/scripts/artifact_shortcuts.py" --root "$OUTER_DIR" "${OUTPUT_DIR}/JobsRemoteHost.app" "${OUTPUT_DIR}/JobsRemoteHost-macOS-$(uname -m).dmg" || return 1
+      open "$OUTPUT_DIR" || return 1
+      open "${OUTPUT_DIR}/JobsRemoteHost.app" || return 1
       ;;
     run-app)
       prepare_python_environment || return 1
