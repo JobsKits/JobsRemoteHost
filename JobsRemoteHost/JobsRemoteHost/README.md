@@ -18,7 +18,7 @@
 | `JobsRemoteHost.spec` | [**PyInstaller**](https://pyinstaller.org/) 打包配置，负责生成 macOS `.app` 或 Windows `.exe`。 |
 | `requirements.txt` | 运行依赖：截图、JPEG 压缩、鼠标键盘控制。 |
 | `requirements-build.txt` | 打包依赖。 |
-| `启动JobsRemoteHost.command` | macOS 内层构建入口。 |
+| `启动JobsRemoteHost.command` | macOS 内层构建入口；文件内部封装完整的 Homebrew / Python 具名自检函数，不依赖外部环境库。 |
 | `启动JobsRemoteHost.bat` | Windows 内层构建入口。 |
 
 ## 二、内部命令 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
