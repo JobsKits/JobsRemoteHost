@@ -37,6 +37,7 @@ dist/
 pip-wheel-metadata/
 
 # PyInstaller and platform build outputs
+JobsRemoteHost/tools/
 dmg-staging/
 output/
 *.dmg
@@ -60,6 +61,8 @@ output/
 # IDE
 .idea/
 .vscode/
+.build/
+.swiftpm/
 
 # 打包产物快捷方式（本机生成）
 *.lnk

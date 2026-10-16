@@ -62,7 +62,7 @@ SELF_TEST_JPEG = base64.b64decode(
 def resource_path(name: str) -> Path:
     """返回源码运行或 PyInstaller 打包后的资源路径。"""
 
-    bundle_root = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+    bundle_root = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent.parent))
     return bundle_root / name
 
 

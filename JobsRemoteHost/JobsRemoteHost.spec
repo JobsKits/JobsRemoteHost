@@ -15,7 +15,7 @@ a = Analysis(
     [str(entry_file)],
     pathex=[str(project_dir)],
     binaries=binaries,
-    datas=[(str(project_dir.parents[1] / "icon.png"), ".")],
+    datas=[(str(project_dir.parent / "icon.png"), ".")],
     hiddenimports=collect_submodules("pynput") + collect_submodules("pystray"),
     hookspath=[],
     hooksconfig={},
