@@ -2,11 +2,32 @@
 
 ![Jobs出品，必属精品](https://picsum.photos/1500/400)
 
-[toc]
+<!-- jobs-toc:start -->
+<!-- jobs-toc:source {"v":2,"token":"[toc]"} -->
+<details>
+<summary>📚 目录（点击展开 / 收起）</summary>
+
+- [🔥 前言](#jobs-toc-heading-1)
+- [一、目录与文件](#project-layout)
+- [二、打包和运行成品](#package-and-run)
+  - [【MacOS】📦生成dmg.command](#jobs-toc-heading-4)
+  - [【Windows】📦生成exe.bat](#jobs-toc-heading-5)
+- [三、环境与依赖](#environment)
+  - [3.1、macOS 自检](#jobs-toc-heading-7)
+  - [3.2、依赖安装与停止条件](#jobs-toc-heading-8)
+- [四、开发与验证命令](#development)
+- [五、连接方式与浏览器协议](#connection-and-protocol)
+- [六、菜单栏与安全边界](#authorization-and-tray)
+- [七、产物与快捷方式](#artifacts)
+- [八、日志与排查](#logs)
+- [九、本仓目录与脚本入口](#repository-layout-and-entrypoints)
+
+</details>
+<!-- jobs-toc:end -->
 
 ---
 
-## 🔥 <font id=前言>前言</font>
+## <span id="jobs-toc-heading-1" data-jobs-toc="v2">🔥 <font id=前言>前言</font></span><!-- jobs-toc:heading-end -->
 
 `JobsRemoteHost` 是浏览器访问型远程协助工具：被控电脑打开可见窗口，访问方只用浏览器进入链接；本机必须弹窗授权，授权前不会返回屏幕画面，也不会执行鼠标键盘事件。
 
@@ -61,7 +82,7 @@
 
 在目标系统上双击根目录对应脚本，或在仓库根目录运行以下命令。默认分别执行 `build-dmg` / `build-exe`，不需要进入内层查找另一份入口。
 
-### [【MacOS】📦生成dmg.command](./【MacOS】📦生成dmg.command)
+### <span id="jobs-toc-heading-4" data-jobs-toc="v2">[【MacOS】📦生成dmg.command](./【MacOS】📦生成dmg.command)</span><!-- jobs-toc:heading-end -->
 
 > **目的：** 生成远程协助工具的 macOS APP / DMG，或进行源码调试与协议自检。
 
@@ -81,7 +102,7 @@
 
 首次使用按系统提示，在“系统设置 → 隐私与安全性”中给实际运行的 `JobsRemoteHost.app` 授予屏幕录制和辅助功能权限。
 
-### [【Windows】📦生成exe.bat](./【Windows】📦生成exe.bat)
+### <span id="jobs-toc-heading-5" data-jobs-toc="v2">[【Windows】📦生成exe.bat](./【Windows】📦生成exe.bat)</span><!-- jobs-toc:heading-end -->
 
 > **目的：** 在 Windows 本机生成远程协助 EXE，或启动源码与协议自检。
 
@@ -107,7 +128,7 @@ Python 版需要 Python 3.11 或更新版本。脚本在 `JobsRemoteHost/.venv/`
 
 运行依赖包括 [**mss**](https://python-mss.readthedocs.io/)、[**Pillow**](https://pillow.readthedocs.io/)、[**pynput**](https://pynput.readthedocs.io/) 和 [**pystray**](https://pystray.readthedocs.io/)，图形界面使用 [**Tkinter**](https://docs.python.org/3/library/tkinter.html)。打包依赖由 `requirements-build.txt` 统一引入。
 
-### 3.1、macOS 自检 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+### <span id="jobs-toc-heading-7" data-jobs-toc="v2">3.1、macOS 自检 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a></span><!-- jobs-toc:heading-end -->
 
 Mac 脚本内部以具名函数携带完整环境自检，不依赖外部环境支持库或父仓文件。阅读运行时自述并确认后，先检查 [**Homebrew**](https://brew.sh/)：已有安装执行 `brew update`，更新自身和配方索引，不全量升级其它软件；缺少时安装并复检。
 
@@ -115,7 +136,7 @@ Mac 脚本内部以具名函数携带完整环境自检，不依赖外部环境�
 
 Python 使用 Homebrew 配方；实际版本和标准库满足要求时复用，不兼容时安装或升级并复检。旧虚拟环境不兼容时完整改名备份后重建，保留备份。Homebrew 和 Python 环境准备可能修改项目目录之外的对应安装位置。
 
-### 3.2、依赖安装与停止条件 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+### <span id="jobs-toc-heading-8" data-jobs-toc="v2">3.2、依赖安装与停止条件 <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a></span><!-- jobs-toc:heading-end -->
 
 - Windows 入口先检查可用的 Python 3.11+，缺少时提示安装后停止。
 - 必需依赖或下载缺失时，直接回车联网安装；任意非空输入（含空格）、EOF 或缺少可交互输入均停止。
