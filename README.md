@@ -61,7 +61,17 @@
 
 在目标系统上双击根目录对应脚本，或在仓库根目录运行以下命令。默认分别执行 `build-dmg` / `build-exe`，不需要进入内层查找另一份入口。
 
-### 2.1、macOS <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+### [【MacOS】📦生成dmg.command](./【MacOS】📦生成dmg.command)
+
+> **目的：** 生成远程协助工具的 macOS APP / DMG，或进行源码调试与协议自检。
+
+* 阅读自述并回车，检查 Homebrew、Python 3.11+，准备内层项目虚拟环境。
+  * 必需依赖缺失：回车安装，任意非空输入取消；失败停止。
+* 按参数选择任务，默认执行 `build-dmg`。
+  * `run-app`：启动源码界面；`self-test`：只运行协议自检，均不生成安装包。
+* 打包模式按需下载 cloudflared，先通过协议自检，再清理外层旧 `dist/` 并构建 APP / DMG。
+* 在构建时间目录保存成品、更新快捷方式，打开产物目录并启动 APP；日志位于系统临时目录。
+
 
 ```shell
 ./【MacOS】📦生成dmg.command
@@ -71,7 +81,17 @@
 
 首次使用按系统提示，在“系统设置 → 隐私与安全性”中给实际运行的 `JobsRemoteHost.app` 授予屏幕录制和辅助功能权限。
 
-### 2.2、Windows <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+### [【Windows】📦生成exe.bat](./【Windows】📦生成exe.bat)
+
+> **目的：** 在 Windows 本机生成远程协助 EXE，或启动源码与协议自检。
+
+* 显示自述并等待按键，检查 Python 3.11+，准备内层 `.venv/`。
+  * Python 缺失时提示后停止；必需依赖缺失时回车安装，任意输入取消。
+* 按参数选择任务，默认执行 `build-exe`。
+  * `run-app`：启动源码界面；`self-test`：运行协议自检。
+* 打包模式按需下载 cloudflared.exe，通过协议自检后清理外层旧 `dist/`，构建并复制为 `JobsRemoteHost-Windows.exe`。
+* 更新成品快捷方式，打开构建时间目录并启动新 EXE；任一步失败即停止。
+
 
 ```bat
 【Windows】📦生成exe.bat
@@ -199,5 +219,31 @@ Python 浏览器协议：
 - 公网链接未生成：检查应用日志中的 `cloudflared` 输出；同一局域网可使用窗口显示的内网地址。
 - 菜单栏图标不可用：应用会记录原因并继续普通窗口模式，核对项目依赖和共享 `icon.png`。
 - 依赖准备失败：查看入口终端和 Mac 脚本日志，修复失败层级后重新运行；不要绕过复检直接打包。
+
+## 九、<span id="repository-layout-and-entrypoints">本仓目录与脚本入口</span> <a href="#前言" style="font-size:17px; color:green;"><b>🔼</b></a> <a href="#🔚" style="font-size:17px; color:green;"><b>🔽</b></a>
+
+以下为当前检出的源码与维护入口；依赖环境、Git 元数据、构建缓存和生成产物略去，独立子仓仅列目录。
+
+```text
+.
+├── .gitignore
+├── 【MacOS】📦生成dmg.command
+├── 【Windows】📦生成exe.bat
+├── icon.png
+├── JobsRemoteHost/
+│   ├── JobsRemoteHost.py
+│   ├── JobsRemoteHost.spec
+│   ├── requirements-build.txt
+│   ├── requirements.txt
+│   └── scripts/
+├── Package.swift
+├── README.md
+├── relay-server/
+│   └── server.js
+├── Sources/
+└── Tests/
+```
+
+* `JobsRemoteHost/` 保存 Python 被控端、依赖、工具与打包辅助代码；`Sources/`、`Tests/` 是 Swift 原型，`relay-server/` 是中继实验源码。
 
 <a id="🔚" href="#前言" style="font-size:17px; color:green; font-weight:bold;">我是有底线的➤点我回到首页</a>
