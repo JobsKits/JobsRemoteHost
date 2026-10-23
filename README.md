@@ -93,7 +93,6 @@
 * 打包模式按需下载 cloudflared，先通过协议自检，再清理外层旧 `dist/` 并构建 APP / DMG。
 * 在构建时间目录保存成品、更新快捷方式，打开产物目录并启动 APP；日志位于系统临时目录。
 
-
 ```shell
 ./【MacOS】📦生成dmg.command
 ```
@@ -112,7 +111,6 @@
   * `run-app`：启动源码界面；`self-test`：运行协议自检。
 * 打包模式按需下载 cloudflared.exe，通过协议自检后清理外层旧 `dist/`，构建并复制为 `JobsRemoteHost-Windows.exe`。
 * 更新成品快捷方式，打开构建时间目录并启动新 EXE；任一步失败即停止。
-
 
 ```bat
 【Windows】📦生成exe.bat
