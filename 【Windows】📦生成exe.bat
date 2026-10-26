@@ -1,7 +1,7 @@
 @echo off
 rem 脚本自述：构建 Windows EXE，或通过 run-app / self-test 参数开发调试。
 rem 运行前先显示影响范围并确认；构建产物统一写入本脚本同层的 dist。
-setlocal EnableExtensions EnableDelayedExpansion
+setlocal EnableExtensions DisableDelayedExpansion
 
 set "SCRIPT_DIR=%~dp0"
 set "PROJECT_DIR=%SCRIPT_DIR%JobsRemoteHost"
@@ -35,18 +35,20 @@ if /I "%MODE%"=="build-exe" (
   call :copy_exe || exit /b 1
   exit /b 0
 )
-if /I "%MODE%"=="run-app" (
-  call :prepare_python_environment || exit /b 1
-  "%PYTHON_BIN%" "%PROJECT_DIR%\JobsRemoteHost.py"
-  exit /b !ERRORLEVEL!
-)
-if /I "%MODE%"=="self-test" (
-  call :prepare_python_environment || exit /b 1
-  call :run_self_test
-  exit /b !ERRORLEVEL!
-)
+if /I "%MODE%"=="run-app" goto run_app_mode
+if /I "%MODE%"=="self-test" goto self_test_mode
 echo 未知参数：%MODE%。可用参数：build-exe / run-app / self-test
 exit /b 1
+
+:run_app_mode
+call :prepare_python_environment || exit /b 1
+"%PYTHON_BIN%" "%PROJECT_DIR%\JobsRemoteHost.py"
+exit /b %ERRORLEVEL%
+
+:self_test_mode
+call :prepare_python_environment || exit /b 1
+call :run_self_test
+exit /b %ERRORLEVEL%
 
 :check_python
 py -3.11 -c "import sys" >nul 2>nul

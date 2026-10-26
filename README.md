@@ -29,7 +29,15 @@
 
 ## <span id="jobs-toc-heading-1" data-jobs-toc="v2">🔥 <font id=前言>前言</font></span><!-- jobs-toc:heading-end -->
 
+**最低支持系统：[Windows](https://www.microsoft.com/windows) 10 64 位（x64）。** 这是当前最低支持目标；具体最低 build 尚未锁定，完整实机兼容性仍待验证。
+
 `JobsRemoteHost` 是浏览器访问型远程协助工具：被控电脑打开可见窗口，访问方只用浏览器进入链接；本机必须弹窗授权，授权前不会返回屏幕画面，也不会执行鼠标键盘事件。
+
+[**Windows**](https://www.microsoft.com/windows) **兼容范围：当前构建与成品测试目标为 Windows 10 / 11 x64；不承诺 Windows 8.1 或更早系统可用。** 图形界面使用 [**Tkinter**](https://docs.python.org/3/library/tkinter.html)，不依赖 Qt。[**Python 3.11 官方 Windows 说明**](https://docs.python.org/3.11/using/windows.html)列出的最低系统是 Windows 8.1，这仅是该解释器的运行时边界；XP、Vista、7、8 不支持当前 Python 3.11+，Windows 8.1 上的本工具完整组合尚未验证。
+
+源码运行与构建要求 `Python>=3.11`，打包另需 `PyInstaller>=6.8`，成品已包含运行时，运行成品无需另外安装 Python。Windows 入口优先使用 `py -3.11`，否则接受 PATH 中的 Python 3.11+；项目依赖未锁定具体版本，下载的 [**cloudflared**](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/downloads/) 为最新版本，均可能抬高最低系统要求。
+
+EXE 架构随构建 Python 与依赖决定，随包 cloudflared 默认使用 amd64，检测到 ARM64 时选择 arm64；x86 / ARM64 尚无统一交付验收。完整验证须覆盖窗口、屏幕采集、鼠标键盘授权、托盘和公网通道，协议自检或打包成功不能替代目标机验收。
 
 当前交付重点是 `./JobsRemoteHost/` 内面向 [**macOS**](https://www.apple.com/macos/) / [**Windows**](https://www.microsoft.com/windows) 的 [**Python**](https://www.python.org) 被控端。两平台的完整打包脚本各保留一份，直接放在仓库根目录；源码、依赖和打包配置集中在一层 `JobsRemoteHost/` 中。本页统一说明使用、开发和打包方式。
 
