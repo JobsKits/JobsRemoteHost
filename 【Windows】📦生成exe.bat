@@ -2,6 +2,8 @@
 rem 脚本自述：构建 Windows EXE，或通过 run-app / self-test 参数开发调试。
 rem 运行前先显示影响范围并确认；构建产物统一写入本脚本同层的 dist。
 setlocal EnableExtensions DisableDelayedExpansion
+set "PYTHONUTF8=1"
+set "PYTHONIOENCODING=utf-8"
 
 set "SCRIPT_DIR=%~dp0"
 set "PROJECT_DIR=%SCRIPT_DIR%JobsRemoteHost"
